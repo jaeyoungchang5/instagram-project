@@ -5,13 +5,15 @@ const bodyParser = require("body-parser");
 const port = 3000;
 const app = express();
 app.use(bodyParser.urlencoded({extended: true}));
+app.set('view engine', "ejs");
 
 app.use('/instagram-project', express.static('public'));
 app.use('/instagram-project/insights', express.static('public'));
 
-
 /* GLOBAL VARIABLES */
-var final_users = [];
+let final_users = [];
+let username = '';
+let password = '';
 
 app.listen(port, function () {
     console.log('server is listening on port ' + port);
@@ -22,29 +24,24 @@ app.get('/instagram-project', function (req, res) {
 });
 
 app.get('/instagram-project/insights', function (req, res) {
-    //res.sendFile(__dirname + '/insights.html');
-    res.write("<h1>Hello, user</h1>");
-    res.write("<h3>The following people are not following you back:</h3>");
-    res.write("<ul>");
-    for (var user of final_users) {
-        res.write("<li>" + user + "</li>");
-    }
-    res.write("</ul>");
-    res.send();
+    res.render('insights', {
+        username_ejs: username,
+        final_users_ejs: final_users
+    });
 });
 
 app.post('/instagram-project/insights', async function (req, res) {
     /* get these using body-parser */
-    var username = req.body.username;
-    var password = req.body.password;
+    username = req.body.username;
+    password = req.body.password;
 
-    await scrape(username, password);
+    await scrape();
 
     res.redirect('/instagram-project/insights');
     
 });
 
-async function scrape(username, password) {
+async function scrape() {
     /* launch a new page in headless chrome with puppeteer */
     const browser = await puppeteer.launch({
         args: ['--no-sandbox',],
@@ -77,16 +74,15 @@ async function scrape(username, password) {
     await page.waitFor(1000);   
 
     /* log in successful */
-    console.log("logged in successfully...");
+    console.log("logged in successfully.");
 
     /* go into user personal page */
     await page.click("a[href='/" + username + "/']");
     await page.waitFor(3000);
-    console.log('made it to your account page...')
 
     /* get number of followers & following */
-    var follower_count = await getCount(page, '2');
-    var following_count = await getCount(page, '3');
+    let follower_count = await getCount(page, '2');
+    let following_count = await getCount(page, '3');
 
 
     follower_count = Number(follower_count.replace(/,/g, ''));
@@ -95,28 +91,28 @@ async function scrape(username, password) {
     console.log("following count: " + following_count);
 
     /* FOLLOWERS - set up */
-    console.log('starting process for followers...');
+    console.log('collecting followers...');
     await page.click('a[href="/' + username + '/followers/"]');
     await page.waitFor(3000);
 
     /* FOLLOWERS - scroll & get usernames */
     await scrollThroughUsers(page, follower_count);
-    var followers = await getUsernames(page);
-    console.log("collected all followers...");
+    let followers = await getUsernames(page);
+    console.log("collected all followers.");
 
     /* FOLLOWERS - exit out of scroll box */
     await page.click("svg[aria-label='Close'");
     await page.waitFor(2000);
 
     /* FOLLOWING - set up */
-    console.log('starting process for following...');
+    console.log('collecting following...');
     await page.click('a[href="/' + username + '/following/"]');
     await page.waitFor(3000);
 
     /* FOLLOWING - scroll & get usernames */
     await scrollThroughUsers(page, following_count);
-    var following = await getUsernames(page);
-    console.log("collected all following...");
+    let following = await getUsernames(page);
+    console.log("collected all following.");
 
     /* FOLLOWING - exit out of scroll box */
     await page.click("svg[aria-label='Close'");
@@ -127,9 +123,9 @@ async function scrape(username, password) {
     await browser.close();
 
     /* Find who's not following you back */
-    console.log('gather users not following you back...');
-    var not_following_back = [];
-    for (var user of following) {
+    console.log('gathering results...');
+    let not_following_back = [];
+    for (let user of following) {
         if (!followers.includes(user)) {
             not_following_back.push(user);
         }
@@ -142,8 +138,8 @@ async function scrollThroughUsers(page, count) {
     await page.evaluate(async function (count) {
         await new Promise(function (resolve, reject) {
             /* scrolls through list of users until it hits the max */
-            var scroll_box = setInterval(function () {
-                var elem = document.querySelector('body > div.RnEpo.Yx5HN > div > div.isgrP');
+            let scroll_box = setInterval(function () {
+                let elem = document.querySelector('body > div.RnEpo.Yx5HN > div > div.isgrP');
                 elem.scrollTop = elem.scrollHeight;
                 /* stops scrolling if maxnum has been reached */
                 if (document.querySelectorAll('body > div.RnEpo.Yx5HN > div > div.isgrP > ul > div > li').length >= count) {
@@ -158,16 +154,16 @@ async function scrollThroughUsers(page, count) {
 
 async function getUsernames(page) {
     return await page.evaluate(async function () {
-        var promise1 = new Promise(function (resolve, reject) {
-            var user_list = []; // empty list of users
-            var full_html_list = document.querySelectorAll('body > div.RnEpo.Yx5HN > div > div.isgrP > ul > div > li');
-            for (var i = 0; i < full_html_list.length; i++) {
+        let promise1 = new Promise(function (resolve, reject) {
+            let user_list = []; // empty list of users
+            let full_html_list = document.querySelectorAll('body > div.RnEpo.Yx5HN > div > div.isgrP > ul > div > li');
+            for (let i = 0; i < full_html_list.length; i++) {
                 user_list.push(full_html_list[i].querySelector('div > div.t2ksc > div.enpQJ > div.d7ByH > a').textContent);
             }
             resolve(user_list);
         });
 
-        var return_value = promise1.then(function (value) {
+        let return_value = promise1.then(function (value) {
             return value;
         });
 
@@ -177,12 +173,12 @@ async function getUsernames(page) {
 
 async function getCount(page, i){
     return await page.evaluate(async function (i) {
-        var following_promise = new Promise(function (resolve, reject) {
-            var text = document.querySelector('#react-root > section > main > div > header > section > ul > li:nth-child(' + i + ') > a > span').textContent;
+        let following_promise = new Promise(function (resolve, reject) {
+            let text = document.querySelector('#react-root > section > main > div > header > section > ul > li:nth-child(' + i + ') > a > span').textContent;
             resolve(text);
         });
 
-        var return_val = following_promise.then(function (value) {
+        let return_val = following_promise.then(function (value) {
             return value;
         });
         return Promise.resolve(return_val);
