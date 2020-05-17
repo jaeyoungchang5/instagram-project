@@ -13,7 +13,7 @@ This app will
 - EJS
 
 ## Note
-The npm packages (node_modules) are not included. If you want to run the code locally, you must npm install the following: "puppeteer", "express", "body-parser"
+The npm packages (node_modules) are not included. If you want to run the code locally, you must do the following:
 ```bash
 npm init
 ...
@@ -21,4 +21,5 @@ npm init
 npm i puppeteer
 npm i express
 npm i body-parser
+npm i ejs
 ```
