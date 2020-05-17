@@ -14,6 +14,7 @@ app.use('/instagram-project/insights', express.static('public'));
 let final_users = [];
 let username = '';
 let password = '';
+let completed = false;
 
 app.listen(port, function () {
     console.log('server is listening on port ' + port);
@@ -26,7 +27,8 @@ app.get('/instagram-project', function (req, res) {
 app.get('/instagram-project/insights', function (req, res) {
     res.render('insights', {
         username_ejs: username,
-        final_users_ejs: final_users
+        final_users_ejs: final_users,
+        completed_ejs: completed
     });
 });
 
@@ -35,7 +37,7 @@ app.post('/instagram-project/insights', async function (req, res) {
     username = req.body.username;
     password = req.body.password;
 
-    await scrape();
+    scrape();
 
     res.redirect('/instagram-project/insights');
     
@@ -45,6 +47,7 @@ async function scrape() {
     /* launch a new page in headless chrome with puppeteer */
     const browser = await puppeteer.launch({
         args: ['--no-sandbox',],
+        //headless: false,
     });
     const page = await browser.newPage();
     await page.setViewport({
@@ -132,6 +135,7 @@ async function scrape() {
     }
     final_users = not_following_back;
     console.log(final_users);
+    completed = true;
 }
 
 async function scrollThroughUsers(page, count) {

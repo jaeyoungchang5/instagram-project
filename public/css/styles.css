@@ -47,3 +47,12 @@ body {
     border-top-left-radius: 0;
     border-top-right-radius: 0;
 }
+
+#instagram-big {
+    margin-bottom: 1.3rem;
+}
+
+#list-box {
+    padding-left: 20%;
+    padding-right: 20%;
+}
