@@ -15,11 +15,5 @@ This app will
 ## Note
 The npm packages (node_modules) are not included. If you want to run the code locally, you must do the following:
 ```bash
-npm init
-...
-
-npm i puppeteer
-npm i express
-npm i body-parser
-npm i ejs
+npm install
 ```
