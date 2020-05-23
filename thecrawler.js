@@ -1,60 +1,48 @@
-const express = require('express');
-const puppeteer = require('puppeteer');
-const bodyParser = require("body-parser");
+const puppeteer = require("puppeteer");
 
-const port = 3000;
-const app = express();
-app.use(bodyParser.urlencoded({extended: true}));
-app.set('view engine', "ejs");
-
-app.use('/instagram-project', express.static('public'));
-app.use('/instagram-project/insights', express.static('public'));
-
-/* GLOBAL VARIABLES */
+/* Global Variables */
 const final_users = [];
-let username = '';
-let password = '';
-let completed = false;
+let page;
+let browser;
+let follower_count;
+let following_count;
+let followers;
+let following;
 
-app.listen(port, function () {
-    console.log('server is listening on port ' + port);
-});
+/*** MAIN DRIVER ***/
+exports.scrape = async function (username, password) {
+    await launch();
+    await log_in(username, password);
+    await personal_page(username);
+    await get_data();
+    await get_followers(username);
+    await get_following(username);
+    await final();
+}
 
-app.get('/instagram-project', function (req, res) {
-    res.sendFile(__dirname + '/log_in.html');
-});
+/*** GET METHODS ***/
+exports.get_final_users = function(){
+    return final_users;
+}
 
-app.get('/instagram-project/insights', function (req, res) {
-    res.render('insights', {
-        username_ejs: username,
-        final_users_ejs: final_users,
-        completed_ejs: completed
+/*** FUNCTIONS ***/
+
+/* launch a new page in headless chrome with puppeteer */
+async function launch() {
+    browser = await puppeteer.launch({
+        args: ["--no-sandbox", ],
+        headless: true,
     });
-});
 
-app.post('/instagram-project/insights', async function (req, res) {
-    /* get these using body-parser */
-    username = req.body.username;
-    password = req.body.password;
-
-    scrape();
-
-    res.redirect('/instagram-project/insights');
-    
-});
-
-async function scrape() {
-    /* launch a new page in headless chrome with puppeteer */
-    const browser = await puppeteer.launch({
-        args: ['--no-sandbox',],
-        headless: false,
-    });
-    const page = await browser.newPage();
+    page = await browser.newPage();
     await page.setViewport({
         width: 1366,
         height: 768
     });
+}
 
+/* log in to instagram account */
+async function log_in(username, password) {
     /* go to site */
     await page.goto("https://instagram.com");
     await page.waitFor(2000);
@@ -67,78 +55,96 @@ async function scrape() {
     await page.waitFor(5000);
 
     /* security page - click "not now" button */
-    try { await page.click("#react-root > section > main > div > div > div > div > button"); } 
-    catch (err) { console.log("security page not detected. moving on..."); }
-    await page.waitFor(3000);
+    try {
+        await page.click("#react-root > section > main > div > div > div > div > button");
+    } catch (err) {
+        console.log("security page not detected. moving on...");
+    }
+    await page.waitFor(1500);
 
     /* notifcations page - click "not now" button */
-    try { await page.click("button.aOOlW.HoLwm"); } 
-    catch (err) { console.log("notifcations page not detected. moving on..."); }
-    await page.waitFor(1000);   
+    try {
+        await page.click("button.aOOlW.HoLwm");
+    } catch (err) {
+        console.log("notifcations page not detected. moving on...");
+    }
+    await page.waitFor(1500);
 
     /* log in successful */
     console.log("logged in successfully.");
+}
 
-    /* go into user personal page */
+/* go to user's personal page */
+async function personal_page(username) {
     await page.click("a[href='/" + username + "/']");
     await page.waitFor(3000);
+}
 
+/* get meta data for user */
+async function get_data(){
     /* get number of followers & following */
-    let follower_count = await getCount(page, '2');
-    let following_count = await getCount(page, '3');
-
+    follower_count = await getCount('2');
+    following_count = await getCount('3');
 
     follower_count = Number(follower_count.replace(/,/g, ''));
     following_count = Number(following_count.replace(/,/g, ''));
     console.log("follower count: " + follower_count);
     console.log("following count: " + following_count);
+}
 
-    /* FOLLOWERS - set up */
+/* get followers */
+async function get_followers(username){
+    /* set up */
     console.log('collecting followers...');
     await page.click('a[href="/' + username + '/followers/"]');
     await page.waitFor(3000);
 
-    /* FOLLOWERS - scroll & get usernames */
-    await scrollThroughUsers(page, follower_count);
-    let followers = await getUsernames(page);
+    /* scroll & get usernames */
+    await scrollThroughUsers(follower_count);
+    followers = await getUsernames();
     console.log("collected " + followers.length + " followers.");
 
-    /* FOLLOWERS - exit out of scroll box */
+    /* exit out of scroll box */
     await page.click("svg[aria-label='Close'");
     await page.waitFor(2000);
+}
 
-    /* FOLLOWING - set up */
+/* get following */
+async function get_following(username){
+    /* set up */
     console.log('collecting following...');
     await page.click('a[href="/' + username + '/following/"]');
     await page.waitFor(3000);
 
-    /* FOLLOWING - scroll & get usernames */
-    await scrollThroughUsers(page, following_count);
-    let following = await getUsernames(page);
+    /* scroll & get usernames */
+    await scrollThroughUsers(following_count);
+    following = await getUsernames();
     console.log("collected " + following.length + " following.");
 
-    /* FOLLOWING - exit out of scroll box */
+    /* exit out of scroll box */
     await page.click("svg[aria-label='Close'");
     await page.waitFor(2000);
+}
 
+/* get final results */
+async function final(){
     /* Close Browser */
-    await page.waitFor(5000);
     await browser.close();
 
     /* Find who's not following you back */
     console.log('gathering results...');
-    let not_following_back = [];
     for (let user of following) {
         if (!followers.includes(user)) {
-            not_following_back.push(user);
+            final_users.push(user);
         }
     }
-    final_users = not_following_back;
-    console.log(final_users);
-    completed = true;
+    console.log("Finished collecting final users: " + final_users);
 }
 
-async function scrollThroughUsers(page, count) {
+/*** UTILITY FUNCTIONS ***/
+
+/* scrolls through users */
+async function scrollThroughUsers(count) {
     await page.evaluate(async function (count) {
         await new Promise(function (resolve, reject) {
             /* scrolls through list of users until it hits the max */
@@ -156,7 +162,8 @@ async function scrollThroughUsers(page, count) {
     }, count);
 }
 
-async function getUsernames(page) {
+/* gets list of users */
+async function getUsernames() {
     return await page.evaluate(async function () {
         let promise1 = new Promise(function (resolve, reject) {
             let user_list = []; // empty list of users
@@ -175,7 +182,8 @@ async function getUsernames(page) {
     });
 }
 
-async function getCount(page, i){
+/* gets following & follower count */
+async function getCount(i) {
     return await page.evaluate(async function (i) {
         let following_promise = new Promise(function (resolve, reject) {
             let text = document.querySelector('#react-root > section > main > div > header > section > ul > li:nth-child(' + i + ') > a > span').textContent;

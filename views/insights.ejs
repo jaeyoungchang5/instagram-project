@@ -19,8 +19,8 @@
     <script src="https://kit.fontawesome.com/06ae721fa9.js" crossorigin="anonymous"></script>
 </head>
 
-<body class="text-center">
-    <div class="container-sm" id="list-box">
+<body>
+    <div class="text-center container-sm" id="list-box">
         <h1 class="greet">Hello, <em><%= username_ejs %></em></h1>
         <br>
         <h3>The following people are not following you back:</h3>
@@ -30,7 +30,9 @@
                 class="list-group-item list-group-item-action"><%= final_users_ejs[i] %></a>
             <% } %>
         </div>
-        <% if (!completed_ejs) { %>
+
+
+        <% if (final_users_ejs.length == 0) { %>
         <div class="text-center">
             <div class="spinner-border" role="status">
                 <span class="sr-only">Loading...</span>
