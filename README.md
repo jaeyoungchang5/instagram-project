@@ -7,6 +7,11 @@ This app will
 - collect your followers & following
 - return a list of people not following you back
 
+To run the code locally, run 
+```bash
+node app.js
+```
+
 ## Languages
 - HTML & CSS (with Bootstrap)
 - Node.js (Javascript & npm packages)
