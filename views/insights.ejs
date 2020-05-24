@@ -1,45 +1,26 @@
-<!doctype html>
-<html lang="en">
+<%- include("partials/header") -%>
 
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
-    <meta name="author" content="JaeYoung Chang">
-    <title>Jae's Instagram Project</title>
+<div>
+    <h1>Hello <em><%= username_ejs %></em></h1>
+    <br>
+    <h3>These people are not following you back:</h3>
+    <hr>
 
-    <!-- Bootstrap core CSS -->
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
-        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
-
-    <!-- Custom styles for this template -->
-    <link href="css/styles.css" rel="stylesheet">
-
-    <!-- Font Awesome CDN -->
-    <script src="https://kit.fontawesome.com/06ae721fa9.js" crossorigin="anonymous"></script>
-</head>
-
-<body>
-    <div class="text-center container-sm" id="list-box">
-        <h1 class="greet">Hello, <em><%= username_ejs %></em></h1>
-        <br>
-        <h3>The following people are not following you back:</h3>
-        <div class="list-group">
-            <% for (let i = 0; i < final_users_ejs.length; i++) { %>
-            <a href="https://instagram.com/<%= final_users_ejs[i] %>/"
-                class="list-group-item list-group-item-action"><%= final_users_ejs[i] %></a>
-            <% } %>
-        </div>
-
-
-        <% if (final_users_ejs.length == 0) { %>
-        <div class="text-center">
-            <div class="spinner-border" role="status">
-                <span class="sr-only">Loading...</span>
-            </div>
-        </div>
+    <% if (final_users_ejs.length > 0) { %>
+    <div class="vertical-menu">
+        <% for (let i = 0; i < final_users_ejs.length; i++) { %>
+        <a href="https://instagram.com/<%= final_users_ejs[i] %>/"><%= final_users_ejs[i] %></a>
         <% } %>
     </div>
-</body>
 
-</html>
+
+    <% } else { %>
+    <div>
+        <div class="spinner-border" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+    <% } %>
+</div>
+
+<%- include("partials/footer") -%>

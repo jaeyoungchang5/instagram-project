@@ -21,7 +21,7 @@ app.listen(port, function () {
 });
 
 app.get('/instagram-project', function (req, res) {
-    res.sendFile(__dirname + '/log_in.html');
+    res.render('log_in');
 });
 
 app.get('/instagram-project/insights', function (req, res) {

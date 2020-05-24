@@ -23,6 +23,26 @@ exports.scrape = async function (username, password) {
 /*** GET METHODS ***/
 exports.get_final_users = function(){
     return final_users;
+    // return [
+    //     'maxpreps', 'catholicsvscorona',
+    //     'barackobama', 'cbssports',
+    //     'cnn', 'netflixisajoke',
+    //     'barstoolsports', 'brianimanuel',
+    //     'techinsider', 'detroitlionsnfl',
+    //     'zoelizabethc.art', 'tank.sinatra',
+    //     'twerk_for_sloths', 'whitepeoplehumor',
+    //     'gracekayser', 'theonion',
+    //     'claudia.hayward', 'techcrunch',
+    //     'dankquillius', 'yourdadsatonmyface',
+    //     'hoereacts', 'grapejuiceboys',
+    //     '5thyear', 'marisackello',
+    //     'shanerankin_', 'ndbarstool',
+    //     'keahyukchang'
+    // ];
+}
+
+exports.get_status = function(){
+    /* statuses: completed, log-in failed, gathering */
 }
 
 /*** FUNCTIONS ***/
@@ -31,7 +51,7 @@ exports.get_final_users = function(){
 async function launch() {
     browser = await puppeteer.launch({
         args: ["--no-sandbox", ],
-        headless: true,
+        headless: false,
     });
 
     page = await browser.newPage();
@@ -147,17 +167,27 @@ async function final(){
 async function scrollThroughUsers(count) {
     await page.evaluate(async function (count) {
         await new Promise(function (resolve, reject) {
+            let start_time = new Date();
             /* scrolls through list of users until it hits the max */
             let scroll_box = setInterval(function () {
+                let elapsed_time = new Date() - start_time;
                 let elem = document.querySelector('body > div.RnEpo.Yx5HN > div > div.isgrP');
                 elem.scrollTop = elem.scrollHeight;
-                /* stops scrolling if maxnum has been reached */
-                if (document.querySelectorAll('body > div.RnEpo.Yx5HN > div > div.isgrP > ul > div > li').length >= count) {
-                    console.log("scrolling stopped...");
+
+                /* stops scrolling if 3 minutes is passed */
+                if (elapsed_time > (3*60*1000)){
+                    console.log("scrolling stopped after " + elapsed_time + " milliseconds");
                     clearInterval(scroll_box);
                     resolve();
                 }
-            }, 1000);
+
+                /* stops scrolling if maxnum has been reached */
+                if (document.querySelectorAll('body > div.RnEpo.Yx5HN > div > div.isgrP > ul > div > li').length >= count) {
+                    console.log("scrolling completed.");
+                    clearInterval(scroll_box);
+                    resolve();
+                }
+            }, 500);
         });
     }, count);
 }
