@@ -16,7 +16,7 @@ app.use('/instagram-project/insights', express.static('public'));
 /* GLOBAL VARIABLES */
 let username = "";
 
-app.listen(process.env.PORT || port, function () {
+app.listen(port, function () {
     console.log('server is listening on port ' + port);
 });
 
