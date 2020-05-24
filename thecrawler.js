@@ -1,7 +1,7 @@
 const puppeteer = require("puppeteer");
 
 /* Global Variables */
-const final_users = [];
+let final_users = [];
 let page;
 let browser;
 let follower_count;
@@ -20,25 +20,17 @@ exports.scrape = async function (username, password) {
     await final();
 }
 
+exports.reset = function(){
+    final_users = [];
+    follower_count = 0;
+    following_count = 0;
+    followers = [];
+    following = [];
+}
+
 /*** GET METHODS ***/
 exports.get_final_users = function(){
     return final_users;
-    // return [
-    //     'maxpreps', 'catholicsvscorona',
-    //     'barackobama', 'cbssports',
-    //     'cnn', 'netflixisajoke',
-    //     'barstoolsports', 'brianimanuel',
-    //     'techinsider', 'detroitlionsnfl',
-    //     'zoelizabethc.art', 'tank.sinatra',
-    //     'twerk_for_sloths', 'whitepeoplehumor',
-    //     'gracekayser', 'theonion',
-    //     'claudia.hayward', 'techcrunch',
-    //     'dankquillius', 'yourdadsatonmyface',
-    //     'hoereacts', 'grapejuiceboys',
-    //     '5thyear', 'marisackello',
-    //     'shanerankin_', 'ndbarstool',
-    //     'keahyukchang'
-    // ];
 }
 
 exports.get_status = function(){
@@ -51,7 +43,7 @@ exports.get_status = function(){
 async function launch() {
     browser = await puppeteer.launch({
         args: ["--no-sandbox", ],
-        headless: false,
+        headless: true,
     });
 
     page = await browser.newPage();

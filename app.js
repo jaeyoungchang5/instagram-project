@@ -16,7 +16,7 @@ app.use('/instagram-project/insights', express.static('public'));
 /* GLOBAL VARIABLES */
 let username = "";
 
-app.listen(port, function () {
+app.listen(process.env.PORT || port, function () {
     console.log('server is listening on port ' + port);
 });
 
@@ -26,7 +26,6 @@ app.get('/instagram-project', function (req, res) {
 
 app.get('/instagram-project/insights', function (req, res) {
     const final_users = crawler.get_final_users();
-    console.log(final_users);
 
     res.render('insights', {
         username_ejs: username,
@@ -43,4 +42,10 @@ app.post('/instagram-project/insights', function (req, res) {
 
     res.redirect('/instagram-project/insights');
 
+});
+
+app.get("/instagram-project/reset", function(req, res){
+    username = "";
+    crawler.reset();
+    res.redirect("/instagram-project");
 });

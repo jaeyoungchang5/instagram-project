@@ -47,7 +47,7 @@ async function scrape() {
     /* launch a new page in headless chrome with puppeteer */
     const browser = await puppeteer.launch({
         args: ['--no-sandbox',],
-        headless: false,
+        headless: true,
     });
     const page = await browser.newPage();
     await page.setViewport({
