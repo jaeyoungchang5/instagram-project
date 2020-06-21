@@ -1,4 +1,4 @@
-# Instagram Project
+# Instagram Insights
 Welcome to my Instagram app!
 
 ## Description & Usage
