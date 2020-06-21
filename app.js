@@ -38,7 +38,7 @@ app.post('/instagram-project/insights', function (req, res) {
     username = req.body.username;
     const password = req.body.password;
 
-    crawler.scrape(username, password);
+    //crawler.scrape(username, password);
 
     res.redirect('/instagram-project/insights');
 

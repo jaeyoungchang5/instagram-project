@@ -8,15 +8,23 @@ let follower_count;
 let following_count;
 let followers;
 let following;
+let status = {
+    log_in_status: true,
+    log_in_status_text: ""
+};
 
 /*** MAIN DRIVER ***/
 exports.scrape = async function (username, password) {
     await launch();
-    await log_in(username, password);
+    if (await log_in(username, password) == false) {
+        status.log_in_status = false;
+        status.log_in_status_text = "LOG-IN FAILED";
+        return;
+    }
     await personal_page(username);
     await get_data();
-    await get_followers(username);
-    await get_following(username);
+    await collect_followers(username);
+    await collect_following(username);
     await final();
 }
 
@@ -26,11 +34,19 @@ exports.reset = function(){
     following_count = 0;
     followers = [];
     following = [];
+    status.log_in_status = true;
+    status.log_in_status_text = "";
 }
 
 /*** GET METHODS ***/
 exports.get_final_users = function(){
-    return final_users;
+    if (status.log_in_status == false){
+        return [status.log_in_status_text];
+    } else {
+        //return final_users;
+        return ["maxpreps", "catholicsvscorona", "barackobama", "cbssports", "cnn", "netflixisajoke", "barstoolsports", "brianimanuel", "techinsider", "detroitlionsnfl"];
+    }
+    
 }
 
 exports.get_status = function(){
@@ -66,6 +82,19 @@ async function log_in(username, password) {
     await page.click("button[type='submit']");
     await page.waitFor(5000);
 
+    /* check if log-in failed */
+    let log_in_status = await page.evaluate(function(){
+        if (document.querySelector("#slfErrorAlert") != null) {
+            return false;
+        }
+    });
+
+    if (log_in_status == false){
+        console.log("log-in failed");
+        return false;
+    }
+    
+
     /* security page - click "not now" button */
     try {
         await page.click("#react-root > section > main > div > div > div > div > button");
@@ -82,8 +111,10 @@ async function log_in(username, password) {
     }
     await page.waitFor(1500);
 
-    /* log in successful */
-    console.log("logged in successfully.");
+    /* log-in succeeded */
+    console.log("log in successful");
+    return true;
+    
 }
 
 /* go to user's personal page */
@@ -105,7 +136,7 @@ async function get_data(){
 }
 
 /* get followers */
-async function get_followers(username){
+async function collect_followers(username){
     /* set up */
     console.log('collecting followers...');
     await page.click('a[href="/' + username + '/followers/"]');
@@ -122,7 +153,7 @@ async function get_followers(username){
 }
 
 /* get following */
-async function get_following(username){
+async function collect_following(username){
     /* set up */
     console.log('collecting following...');
     await page.click('a[href="/' + username + '/following/"]');

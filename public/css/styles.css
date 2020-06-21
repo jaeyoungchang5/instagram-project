@@ -16,6 +16,7 @@
     letter-spacing: 1px;
     background-color: #e3f2fd;
     color: #000;
+    position: sticky;
 }
 
 .navbar-nav li a:hover {
@@ -59,14 +60,16 @@
 }
 
 /* INSIGHTS page */
+.table {
+    text-align: left;
+}
+
 .vertical-menu{
     background-color: #eee;
     height: 300px;
     overflow-y: auto;
     margin-left: auto;
     margin-right: auto;
-    
-
 }
 
 .vertical-menu a{
@@ -89,21 +92,17 @@
 
 
 /* Footer */
-.footer-padding {
-    padding-bottom: 60px;
-}
 
 .footer {
-    position: fixed;
+    margin-top: 60px;
     text-align: center;
-    bottom: 0;
     width: 100%;
     height: 60px;
     background-color: #e3f2fd;
 }
 
 .footer p {
-    margin-top: 25px;
+    padding-top: 15px;
     font-size: 12px;
     color: #000;
 }

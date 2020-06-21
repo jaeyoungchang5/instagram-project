@@ -3,24 +3,30 @@
 <div>
     <h1>Hello <em><%= username_ejs %></em></h1>
     <br>
-    <h3>These people are not following you back:</h3>
+    
+    <h4>Followers:</h4>
     <hr>
+    <p><em>Loading...</em></p>
 
+    <br>
+
+    <h4>Following:</h4>
+    <hr>
+    <p><em>Loading...</em></p>
+
+    <br>
+
+    <h4>Not following you back:</h4>
+    <hr>
+    <p><em>Loading...</em></p>
     <% if (final_users_ejs.length > 0) { %>
     <div class="vertical-menu">
         <% for (let i = 0; i < final_users_ejs.length; i++) { %>
         <a href="https://instagram.com/<%= final_users_ejs[i] %>/"><%= final_users_ejs[i] %></a>
         <% } %>
     </div>
-
-
-    <% } else { %>
-    <div>
-        <div class="spinner-border" role="status">
-            <span class="sr-only">Loading...</span>
-        </div>
-    </div>
     <% } %>
+
 </div>
 
 <%- include("partials/footer") -%>
