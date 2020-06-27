@@ -1,7 +1,7 @@
 /* MODULES */
 const express = require('express');
 const bodyParser = require("body-parser");
-const crawler = require(__dirname + "/thecrawler.js");
+const crawler = require(__dirname + "/src/crawler.js");
 
 const port = 3000;
 const app = express();
@@ -20,12 +20,14 @@ app.listen(port, function () {
     console.log('server is listening on port ' + port);
 });
 
+/* GET & POST requests */
+
 app.get('/instagram-project', function (req, res) {
     res.render('log_in');
 });
 
 app.get('/instagram-project/insights', function (req, res) {
-    const final_users = crawler.get_final_users();
+    const final_users = crawler.get_nonfollowers();
 
     res.render('insights', {
         username_ejs: username,
@@ -38,7 +40,7 @@ app.post('/instagram-project/insights', function (req, res) {
     username = req.body.username;
     const password = req.body.password;
 
-    //crawler.scrape(username, password);
+    crawler.scrape(username, password);
 
     res.redirect('/instagram-project/insights');
 

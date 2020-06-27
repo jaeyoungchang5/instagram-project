@@ -9,7 +9,7 @@ let following_count;
 let followers;
 let following;
 let status = {
-    log_in_status: true,
+    isLoginSuccess: true,
     log_in_status_text: ""
 };
 
@@ -17,8 +17,8 @@ let status = {
 exports.scrape = async function (username, password) {
     await launch();
     if (await log_in(username, password) == false) {
-        status.log_in_status = false;
-        status.log_in_status_text = "LOG-IN FAILED";
+        status.isLoginSuccess = false;
+        status.log_in_status_text = "LOGIN FAILED";
         return;
     }
     await personal_page(username);
@@ -34,23 +34,25 @@ exports.reset = function(){
     following_count = 0;
     followers = [];
     following = [];
-    status.log_in_status = true;
+    status.isLoginSuccess = true;
     status.log_in_status_text = "";
 }
 
 /*** GET METHODS ***/
-exports.get_final_users = function(){
-    if (status.log_in_status == false){
+exports.get_nonfollowers = function(){
+    if (status.isLoginSuccess== false){
         return [status.log_in_status_text];
     } else {
-        //return final_users;
-        return ["maxpreps", "catholicsvscorona", "barackobama", "cbssports", "cnn", "netflixisajoke", "barstoolsports", "brianimanuel", "techinsider", "detroitlionsnfl"];
+        /* uncomment when testing */
+        //return ["maxpreps", "catholicsvscorona", "barackobama", "cbssports", "cnn", "netflixisajoke", "barstoolsports", "brianimanuel", "techinsider", "detroitlionsnfl"];
+
+        return final_users;
     }
     
 }
 
 exports.get_status = function(){
-    /* statuses: completed, log-in failed, gathering */
+    /* statuses: completed, login failed, gathering */
 }
 
 /*** FUNCTIONS ***/
@@ -76,21 +78,21 @@ async function log_in(username, password) {
     await page.waitFor(2000);
 
     /* log in with credentials */
-    console.log("attempting log-in...");
+    console.log("attempting login...");
     await page.type("input[name='username']", username);
     await page.type("input[name='password']", password);
     await page.click("button[type='submit']");
     await page.waitFor(5000);
 
-    /* check if log-in failed */
-    let log_in_status = await page.evaluate(function(){
+    /* check if login failed */
+    let isLoginSuccess= await page.evaluate(function(){
         if (document.querySelector("#slfErrorAlert") != null) {
             return false;
         }
     });
 
-    if (log_in_status == false){
-        console.log("log-in failed");
+    if (isLoginSuccess== false){
+        console.log("login failed");
         return false;
     }
     
@@ -111,8 +113,8 @@ async function log_in(username, password) {
     }
     await page.waitFor(1500);
 
-    /* log-in succeeded */
-    console.log("log in successful");
+    /* login succeeded */
+    console.log("login successful");
     return true;
     
 }
@@ -126,8 +128,8 @@ async function personal_page(username) {
 /* get meta data for user */
 async function get_data(){
     /* get number of followers & following */
-    follower_count = await getCount('2');
-    following_count = await getCount('3');
+    follower_count = await getUserCount('2');
+    following_count = await getUserCount('3');
 
     follower_count = Number(follower_count.replace(/,/g, ''));
     following_count = Number(following_count.replace(/,/g, ''));
@@ -236,7 +238,7 @@ async function getUsernames() {
 }
 
 /* gets following & follower count */
-async function getCount(i) {
+async function getUserCount(i) {
     return await page.evaluate(async function (i) {
         let following_promise = new Promise(function (resolve, reject) {
             let text = document.querySelector('#react-root > section > main > div > header > section > ul > li:nth-child(' + i + ') > a > span').textContent;
