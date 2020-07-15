@@ -61,7 +61,7 @@ exports.get_status = function(){
 async function launch() {
     browser = await puppeteer.launch({
         args: ["--no-sandbox", ],
-        headless: true,
+        headless: false,
     });
 
     page = await browser.newPage();
