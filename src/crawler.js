@@ -196,7 +196,7 @@ async function scrollThroughUsers(count) {
             /* scrolls through list of users until it hits the max */
             let scroll_box = setInterval(function () {
                 let elapsed_time = new Date() - start_time;
-                let elem = document.querySelector('body > div.RnEpo.Yx5HN > div > div.isgrP');
+                let elem = document.querySelector('body > div.RnEpo.Yx5HN > div > div > div.isgrP');
                 elem.scrollTop = elem.scrollHeight;
 
                 /* stops scrolling if 3 minutes is passed */
@@ -207,7 +207,7 @@ async function scrollThroughUsers(count) {
                 }
 
                 /* stops scrolling if maxnum has been reached */
-                if (document.querySelectorAll('body > div.RnEpo.Yx5HN > div > div.isgrP > ul > div > li').length >= count) {
+                if (document.querySelectorAll('body > div.RnEpo.Yx5HN > div > div > div.isgrP > ul > div > li').length >= count) {
                     console.log("scrolling completed.");
                     clearInterval(scroll_box);
                     resolve();
@@ -222,7 +222,7 @@ async function getUsernames() {
     return await page.evaluate(async function () {
         let promise1 = new Promise(function (resolve, reject) {
             let user_list = []; // empty list of users
-            let full_html_list = document.querySelectorAll('body > div.RnEpo.Yx5HN > div > div.isgrP > ul > div > li');
+            let full_html_list = document.querySelectorAll('body > div.RnEpo.Yx5HN > div > div > div.isgrP > ul > div > li');
             for (let i = 0; i < full_html_list.length; i++) {
                 user_list.push(full_html_list[i].querySelector('div > div.t2ksc > div.enpQJ > div.d7ByH > a').textContent);
             }
