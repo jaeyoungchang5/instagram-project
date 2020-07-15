@@ -1,4 +1,4 @@
-# Instagram Insights
+# Instagram Projects
 This is the repo for my Instagram Insights web application.
 
 ## Description & Usage
@@ -10,7 +10,7 @@ This web application will
 - take your Instagram username and password
 - collect your followers & following
 - return a list of people not following you back
-- return a list of people who have unfollowed you
+- return a list of people who have unfollowed you (module in progress)
 - give you other analytics
 
 To run the code locally, run 
